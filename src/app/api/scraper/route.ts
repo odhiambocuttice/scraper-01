@@ -1,9 +1,14 @@
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import { convert } from 'html-to-text';
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { JSDOM } from 'jsdom';
+import chromium from "@sparticuz/chromium-min";
 
+chromium.setHeadlessMode = true;
+
+// Optional: If you'd like to disable webgl, true is the default.
+chromium.setGraphicsMode = false;
 
 async function fetchHTMLPuppeteer(url: string): Promise<string> {
     if (typeof window !== 'undefined') {
@@ -12,14 +17,19 @@ async function fetchHTMLPuppeteer(url: string): Promise<string> {
 
     const browser = await puppeteer.launch({
         headless: true,
-        args: [
+        args:
+
+            [
             '--disable-dev-shm-usage',
             '--no-sandbox',
             '--disable-gpu',
             '--disable-extensions',
+                '--disable-web-security',
+                '--disable-features=IsolateOrigins,site-per-process'
         ],
-        // executablePath: process.env.CHROME_EXECUTABLE_PATH,
+        executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath()
     });
+    const isLocal = !!process.env.CHROME_EXECUTABLE_PATH
 
     const page = await browser.newPage();
 
