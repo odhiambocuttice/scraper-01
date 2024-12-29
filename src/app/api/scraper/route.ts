@@ -16,6 +16,7 @@ async function fetchHTMLPuppeteer(url: string): Promise<string> {
     }
 
     const browser = await puppeteer.launch({
+        ignoreHTTPSErrors: true,
         headless: true,
         args:
 
@@ -27,7 +28,10 @@ async function fetchHTMLPuppeteer(url: string): Promise<string> {
                 '--disable-web-security',
                 '--disable-features=IsolateOrigins,site-per-process'
         ],
-        executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath()
+        // executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath()
+        executablePath: await chromium.executablePath(
+            `https://github.com/Sparticuz/chromium/releases/download/v126.0.0/chromium-v126.0.0-pack.tar`
+        )
     });
     const isLocal = !!process.env.CHROME_EXECUTABLE_PATH
 
