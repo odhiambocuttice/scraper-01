@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 157 35 12%;
+  --foreground: 48 43 91%;
+  
+  --card: 157 35 12%;
+  --card-foreground: 48 43 91%;
+  
+  --popover: 157 35 12%;
+  --popover-foreground: 48 43 91%;
+  
+  --primary: 48 43 91%;
+  --primary-foreground: 157 35 12%;
+  
+  --secondary: 48 43 15%;
+  --secondary-foreground: 48 43 91%;
+  
+  --muted: 48 43 15%;
+  --muted-foreground: 48 43 60%;
+  
+  --accent: 48 43 15%;
+  --accent-foreground: 48 43 91%;
+  
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 48 43 91%;
+  
+  --border: 48 43 91%;
+  --input: 48 43 91%;
+  --ring: 48 43 91%;
+  
+  --radius: 1rem;
+}
+
+.dark {
+  --background: 157 35 12%;
+  --foreground: 48 43 91%;
+  
+  --card: 157 35 12%;
+  --card-foreground: 48 43 91%;
+  
+  --popover: 157 35 12%;
+  --popover-foreground: 48 43 91%;
+  
+  --primary: 48 43 91%;
+  --primary-foreground: 157 35 12%;
+  
+  --secondary: 48 43 15%;
+  --secondary-foreground: 48 43 91%;
+  
+  --muted: 48 43 15%;
+  --muted-foreground: 48 43 60%;
+  
+  --accent: 48 43 15%;
+  --accent-foreground: 48 43 91%;
+  
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 48 43 91%;
+  
+  --border: 48 43 91%;
+  --input: 48 43 91%;
+  --ring: 48 43 91%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+

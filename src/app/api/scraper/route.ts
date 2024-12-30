@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { JSDOM } from 'jsdom';
 import chromium from "@sparticuz/chromium-min";
-
+import { writeFile } from 'fs/promises';
+import path from 'path';
 chromium.setHeadlessMode = true;
 
 // Optional: If you'd like to disable webgl, true is the default.
@@ -115,13 +116,13 @@ function generateSystemMessage(fieldNames: string[]): string {
     You are an intelligent text extraction and conversion assistant. Your task is to extract structured information 
     from the given text and convert it into a pure JSON format. The JSON should contain only the structured data extracted from the text, 
     with no additional commentary, explanations, or extraneous information. When the text has ellipsis, find the full text. The locations of the events should be in Kenya only.
-    Make sure the photo links are valid.
+    Make sure the photo links are valid. Also get the link to the single event page.
     You could encounter cases where you can't find the data of the fields you have to extract or the data will be in a foreign language.
     Please process the following text and provide the output in pure JSON format with no words before or after the JSON:
     Please ensure the output strictly follows this schema:
 
     {
-        "listings": [
+        [
             {
                 ${schemaStructure}
             }
@@ -131,7 +132,7 @@ function generateSystemMessage(fieldNames: string[]): string {
 }
 
 async function processDataWithGroq(content: string, fieldNames: string[]): Promise<any> {
-    const client = new Groq({ apiKey: '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' });
+    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const systemMessage = generateSystemMessage(fieldNames);
 
     const response = await client.chat.completions.create({
@@ -147,20 +148,54 @@ async function processDataWithGroq(content: string, fieldNames: string[]): Promi
 }
 
 
+// export async function POST() {
+//     const url = 'https://kenyabuzz.com/events/month/january'; // Target URL
+//     const fieldNames = ['eventName', 'date', 'location', 'description', 'photoLink']; // Fields to extract
+
+//     try {
+//         const rawHtml = await fetchHTMLPuppeteer(url);
+//         const cleanedHtml = cleanHTML(rawHtml);
+//         const newMd = htmlToMarkdown(cleanedHtml);
+
+//         // Process data with Groq
+//         const extractedData = await processDataWithGroq(newMd, fieldNames);
+
+//         console.log('Extracted Data:', JSON.stringify(extractedData, null, 2));
+//         return NextResponse.json(extractedData);
+//     } catch (error: any) {
+//         console.error('Error during processing:', error.message);
+//         return NextResponse.json({ error: 'Failed to process the request' }, { status: 500 });
+//     }
+// }
+
 export async function POST() {
-    const url = 'https://kenyabuzz.com/events/month/january'; // Target URL
-    const fieldNames = ['eventName', 'date', 'location', 'description', 'photoLink']; // Fields to extract
+    const urls = [
+        'https://kenyabuzz.com/events/month/january',
+        'https://www.ticketsasa.com/events/listing/upcoming',
+        'https://magicalkenya.com/magical-kenya-events/',
+        // Add more URLs as needed
+    ];
+
+    const fieldNames = ['eventName', 'date', 'location', 'description', 'photoLink', 'eventLink']; // Fields to extract
 
     try {
-        const rawHtml = await fetchHTMLPuppeteer(url);
-        const cleanedHtml = cleanHTML(rawHtml);
-        const newMd = htmlToMarkdown(cleanedHtml);
+        let allData: any = [];
 
-        // Process data with Groq
-        const extractedData = await processDataWithGroq(newMd, fieldNames);
+        for (const url of urls) {
+            const rawHtml = await fetchHTMLPuppeteer(url);
+            const cleanedHtml = cleanHTML(rawHtml);
+            const newMd = htmlToMarkdown(cleanedHtml);
+            const extractedData = await processDataWithGroq(newMd, fieldNames);
+            allData = [...allData, ...extractedData];
+        }
 
-        console.log('Extracted Data:', JSON.stringify(extractedData, null, 2));
-        return NextResponse.json(extractedData);
+        const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
+        await writeFile(filePath, JSON.stringify(allData, null, 2));
+
+
+        console.log('Extracted Data:', JSON.stringify(allData, null, 2));
+        return NextResponse.json(allData);
+
     } catch (error: any) {
         console.error('Error during processing:', error.message);
         return NextResponse.json({ error: 'Failed to process the request' }, { status: 500 });
